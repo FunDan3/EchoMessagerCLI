@@ -68,7 +68,6 @@ else:
 print(f"Connecting to {server_addr}")
 client = EchoAPI.Client(server_addr)
 messages = {}
-total_new_messages = 0
 
 @client.event.on_connected
 async def on_connected():
@@ -99,12 +98,27 @@ async def on_login():
 	print("Logged in. Use 'help' to get list of commands")
 	while True:
 		inp = await aioconsole.ainput(f"{client.username}:{client.user.identity_hash} > ")
-
+		args = inp.split(" ")
+		command = args[0]
+		args.pop(0)
+		if command == "read":
+			if len(args)!=1:
+				print("Command 'read' takes exactly one argument - 'username'")
+				return
+			if args[0] not in messages or not messages[args[0]]:
+				print(f"No new messages from '{args[0]}'")
+				return
+			author = await client.fetch_user(args[0])
+			print(f"Reading messages from {author.username}:{author.identity_hash}...")
+			separator = "-" * term.getSize()[1]
+			print(separator)
+			for message in messages[args[0]]:
+				await message.read()
+				print(message.content.replace(separator, ""))
+				print(separator)
 @client.event.on_message
 async def on_message(message):
-	global messages
 	if message.author.username not in messages:
 		messages[message.author.username] = []
 	messages[message.author.username].append(message)
-
 client.start()
