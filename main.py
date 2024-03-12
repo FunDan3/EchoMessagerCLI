@@ -101,13 +101,17 @@ async def on_login():
 		args = inp.split(" ")
 		command = args[0]
 		args.pop(0)
-		if command == "read":
+		if command == "inbox":
+			for author, new_messages in messages.items():
+				author = await client.fetch_user(author)
+				print(f"{author.username}:{author.identity_hash} - {len(new_messages)} new messages")
+		elif command == "read":
 			if len(args)!=1:
 				print("Command 'read' takes exactly one argument - 'username'")
-				return
+				continue
 			if args[0] not in messages or not messages[args[0]]:
 				print(f"No new messages from '{args[0]}'")
-				return
+				continue
 			author = await client.fetch_user(args[0])
 			print(f"Reading messages from {author.username}:{author.identity_hash}...")
 			separator = "-" * term.getSize()[1]
@@ -116,6 +120,8 @@ async def on_login():
 				await message.read()
 				print(message.content.replace(separator, ""))
 				print(separator)
+		else:
+			print(f"Unknown command '{command}'")
 @client.event.on_message
 async def on_message(message):
 	if message.author.username not in messages:
