@@ -102,6 +102,9 @@ async def on_login():
 		command = args[0]
 		args.pop(0)
 		if command == "inbox":
+			if args:
+				print("Command 'inbox' does not take any arguments")
+				continue
 			for author, new_messages in messages.items():
 				author = await client.fetch_user(author)
 				print(f"{author.username}:{author.identity_hash} - {len(new_messages)} new messages")
