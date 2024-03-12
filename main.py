@@ -5,6 +5,28 @@ import term
 import json
 import os
 
+license = f"""EchoMessagerCLI - Messager using peer to peer post-quantum encryption
+Copyright (C) 2024 Fun_Dan3
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but {term.blink}{term.bold}{term.red}WITHOUT ANY WARRANTY{term.off}; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+Contact - dfr34560@gmail.com
+
+"""
+
+for line in license.split("\n"):
+	print(term.textCenter(line))
+
 def save_settings(settings):
 	with open(f"./settings.json", "w") as f:
 		f.write(json.dumps(settings))
@@ -45,9 +67,11 @@ else:
 
 print(f"Connecting to {server_addr}")
 client = EchoAPI.Client(server_addr)
+messages = {}
+total_new_messages = 0
 
 @client.event.on_connected
-async def connected():
+async def on_connected():
 	if not settings["Credentials"]:
 		print(term.textCenter("Terms And Conditions"))
 		print(client.server_terms_and_conditions)
@@ -70,7 +94,17 @@ async def connected():
 		await client.login(settings["Credentials"]["Login"], settings["Credentials"]["Password"])
 
 @client.event.on_login
-async def logged_in():
+async def on_login():
 	save_settings(settings)
+	print("Logged in. Use 'help' to get list of commands")
+	while True:
+		inp = await aioconsole.ainput(f"{client.username}:{client.user.identity_hash} > ")
+
+@client.event.on_message
+async def on_message(message):
+	global messages
+	if message.author.username not in messages:
+		messages[message.author.username] = []
+	messages[message.author.username].append(message)
 
 client.start()
