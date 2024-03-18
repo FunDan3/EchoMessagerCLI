@@ -24,9 +24,12 @@ Contact - dfr34560@gmail.com
 
 """
 
-help_text = """inbox - Display list of users that messaged you.
-read <username> - read messagess sent from <username>.
-help - display this message."""
+help_text = """
+inbox - Display list of users that messaged you.
+read <username> - Read messagess sent from <username>.
+exit - Stop the program.
+help - Display this message.
+"""
 
 for line in license.split("\n"):
 	print(term.textCenter(line))
@@ -128,6 +131,11 @@ async def on_login():
 				print(message.content.replace(separator, ""))
 				print(separator)
 			print(f"{author.username}'s identity hash is {author.identity_hash}. Make sure that it is really their identity before trusting those messages.")
+		elif command == "exit":
+			if args:
+				print("Command 'exit' doesnt take any arguments")
+				continue
+			exit()
 		elif command == "help":
 			if args:
 				print("Command 'help' doesnt take any arguments")
